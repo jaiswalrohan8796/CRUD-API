@@ -1,60 +1,61 @@
-import { v4 as uuidv4 } from 'uuid';  // id generator
+import { User } from "../models/model.js";
 
-// data container 
-
-var users =[
-    {
-        "name": "Amol Sankpal",
-        "subject": "OC",
-        "age": 40
-    },
-    {
-        "name": "Samana Jafri",
-        "subject": "BDA",
-        "age": 34
-    },
-    {
-        "name": "Awij Shaikh",
-        "subject": "MCOM",
-        "age": 40
-    },
-]
-
-
-export const getUsers = (req,res,next) => {
-   res.send(users)
-}
-
-export const addUser = (req,res,next) => {
-    const newUser = req.body
-    users.push({id : uuidv4(), ...newUser })
-    res.send(`User added : ${newUser.name} teaches ${newUser.subject}`)
-}
-
-export const getUser = (req,res,next) => {
-    const id = req.params.id
-    const thatUser = users.filter((u)=> u.id === id)
-    res.send(thatUser)
-}
-
-export const deleteUser = (req,res,next) => {
-    const id = req.params.id
-    users = users.filter((u)=> u.id !== id)
-    res.send(`User with id : ${id} is deleted`);
-}
-
-export const updateUser = (req,res,next) => {
-    const id = req.params.id
-    const thatUser = users.find((u)=> u.id === id)
-
-    if (req.body.name) {
-        thatUser.name = req.body.name
+export const getUsers = (req, res, next) => {
+    try {
+        User.find().then((users => {
+            res.send(users)
+        }))
+    } catch (err) {
+        console.log(err.message)
     }
-    if (req.body.age) {
-        thatUser.age = req.body.age
-    }
-    if (req.body.subject) {
-        thatUser.subject = req.body.subject
-    }
-    res.send(` User with id : ${id} updated `)
-}
+};
+
+export const addUser = (req, res, next) => {
+    const newUser = User({
+        name: req.body.name,
+        subject: req.body.subject,
+        age: req.body.age,
+    });
+    newUser
+        .save()
+        .then(() => console.log("new user added"))
+        .catch((err) => console.log(err));
+    res.send(`New User added: ${newUser.name}`);
+};
+
+export const getUser = (req, res, next) => {
+    const id = req.params.id;
+    User.findById(id).then((user) => {
+        res.send(user);
+    });
+};
+
+export const deleteUser = (req, res, next) => {
+    const id = req.params.id;
+    User.findById(id)
+        .then((user) => {
+            user.delete();
+            res.send(` User : ${user.name} is deleted`);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+export const updateUser = (req, res, next) => {
+    const id = req.params.id;
+    User.findById(id).then((user) => {
+        User.updateOne(
+            { _id: user._id },
+            {
+                name: req.body.name,
+                age: req.body.age,
+                subject: req.body.subject,
+            }
+        )
+            .then(() => {
+                res.send(` User with id : ${id} updated `);
+            })
+            .catch((err) => console.log(err));
+    });
+};
