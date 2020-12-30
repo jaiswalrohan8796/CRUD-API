@@ -13,14 +13,15 @@ export const getUsers = (req, res, next) => {
 export const addUser = (req, res, next) => {
     const newUser = User({
         name: req.body.name,
-        subject: req.body.subject,
+        role: req.body.role,
         age: req.body.age,
+        subjects: req.body.subjects,
+        city: req.body.city
     });
     newUser
         .save()
-        .then(() => console.log("new user added"))
+        .then(() => res.send(`New User added: ${newUser.name}`))
         .catch((err) => console.log(err));
-    res.send(`New User added: ${newUser.name}`);
 };
 
 export const getUser = (req, res, next) => {
@@ -49,8 +50,10 @@ export const updateUser = (req, res, next) => {
             { _id: user._id },
             {
                 name: req.body.name,
+                role: req.body.role,
                 age: req.body.age,
-                subject: req.body.subject,
+                subjects: req.body.subjects,
+                city: req.body.city
             }
         )
             .then(() => {
